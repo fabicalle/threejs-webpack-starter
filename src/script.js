@@ -15,14 +15,37 @@ const scene = new THREE.Scene()
 // Objects
 const geometry = new THREE.TorusGeometry( .7, .2, 16, 100 );
 
+const particlesGeometry = new THREE.BufferGeometry;
+const particlesCount = 5000;
+
+const posArray = new Float32Array(particlesCount * 3);
+
+for (let i = 0; i < particlesCount * 3; i++) {
+   // posArray[i] = Math.random();
+    //posArray[i]= Math.random() -0.5;
+    posArray[i]= (Math.random() -0.5) * 15;  
+}
+
+particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray,3))
+
 // Materials
 
-const material = new THREE.MeshBasicMaterial()
-material.color = new THREE.Color(0xff0000)
+const material = new THREE.PointsMaterial({
+size: 0.007,
+color: 'gold'
+})
+
+const particlesMaterial = new THREE.PointsMaterial({
+    size: 0.005,
+    color: 'white',
+    //blending: THREE.AdditiveBlending
+    })
+
 
 // Mesh
-const sphere = new THREE.Mesh(geometry,material)
-scene.add(sphere)
+const sphere = new THREE.Points(geometry,material)
+const particleMesh = new THREE.Points(particlesGeometry, particlesMaterial)
+scene.add(sphere, particleMesh)
 
 // Lights
 
@@ -77,6 +100,19 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+renderer.setClearColor(new THREE.Color('#21282a'),1)
+
+//Mouse
+
+document.addEventListener('mousemove', animateParticles)
+
+let mouseX = 0
+let mouseY = 0
+
+function animateParticles(event){
+    mouseY = event.clientY
+    mouseX = event.clientX
+}
 
 /**
  * Animate
@@ -91,7 +127,13 @@ const tick = () =>
 
     // Update objects
     sphere.rotation.y = .5 * elapsedTime
+    particleMesh.rotation.y = -.1 * elapsedTime
 
+    if(mouseX > 0){
+
+    particleMesh.rotation.x = -mouseY *(elapsedTime * 0.00008)
+    particleMesh.rotation.y = -mouseX *(elapsedTime * 0.00008)
+}
     // Update Orbital Controls
     // controls.update()
 
